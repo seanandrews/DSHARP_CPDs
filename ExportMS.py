@@ -18,20 +18,21 @@ def ExportMS(msfile, spwavg=False, timebin=None):
     tb.close()
 
     # spectral averaging to 1 channel per SPW (with optional time-averaging)
-    os.system('rm -rf ' + MS_filename + '_spavg.ms')
     if timebin is not None:
+        suffix = '_spavg_tbin'+timebin
+        os.system('rm -rf ' + MS_filename + suffix + '.ms')
         split(vis=MS_filename+'.ms', width=num_chan, datacolumn='data', 
-              outputvis=MS_filename+'_spavg.ms', keepflags=False, 
+              outputvis=MS_filename+suffix+'.ms', keepflags=False, 
               timebin=timebin)
-        suffix = '_tbin'+timebin
     else:
+        suffix = '_spavg'
+        os.system('rm -rf ' + MS_filename + suffix + '.ms')
         split(vis=MS_filename+'.ms', width=num_chan, datacolumn='data',
-              outputvis=MS_filename+'_spavg.ms', keepflags=False,
+              outputvis=MS_filename+suffix+'.ms', keepflags=False,
               timebin=timebin)
-        suffix = ''
 
     # get the data tables out of the MS file
-    tb.open(MS_filename+'_spavg.ms')
+    tb.open(MS_filename+suffix+'.ms')
     data = np.squeeze(tb.getcol("DATA"))
     flag = np.squeeze(tb.getcol("FLAG"))
     uvw = tb.getcol("UVW")
@@ -41,7 +42,7 @@ def ExportMS(msfile, spwavg=False, timebin=None):
     tb.close()
 
     # get frequency information
-    tb.open(MS_filename+'_spavg.ms/SPECTRAL_WINDOW')
+    tb.open(MS_filename+suffix+'.ms/SPECTRAL_WINDOW')
     freqlist = np.squeeze(tb.getcol("CHAN_FREQ"))
     tb.close()
 
@@ -148,8 +149,7 @@ def ExportMS(msfile, spwavg=False, timebin=None):
     else:
         u, v = um * freqs / 2.9979e8, vm * freqs / 2.9979e8
 
-    # output to npz file and delete the intermediate MS
-    #os.system('rm -rf '+MS_filename+'_spavg.ms')
+    # output to npz file 
     os.system('rm -rf '+MS_filename+suffix+'.vis.npz')
     np.savez(MS_filename+suffix+'.vis', u=u, v=v, Vis=vis, Wgt=wgt)
     print("# Measurement set exported to "+MS_filename+suffix+".vis.npz")

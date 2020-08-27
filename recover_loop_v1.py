@@ -19,7 +19,7 @@ offRA, offDEC = -0.060, -0.509
 incl, PA = 22., 26.
 
 # bookkeeping
-recov_file = 'SR4_continuum_CPDrecoveries.txt'
+recov_file = 'SR4_continuum_CPDrecoveries_v3.txt'
 os.system('rm -rf '+recov_file)
 
 # loop
@@ -45,6 +45,16 @@ for i in range(len(Fstr)):
                                             raz_gap.shape)
     az_peak, r_peak = tbins[tpeak_idx[-1]], rbins_gap[rpeak_idx[-1]]
 
+    # for injected CPDs with low fluxes, check and see if the azimuth is 
+    # too close to "real" candidate; if it is, set that point to zero and 
+    # re-find until that's no longer true
+    if (Fcpd[i] <= 160):
+        while (np.abs(az_peak - 114.) < 10.):
+            raz_gap[tpeak_idx[-1], rpeak_idx[-1]] = 0.
+            tpeak_idx, rpeak_idx = np.unravel_index(np.argsort(raz_gap, 
+                                       axis=None), raz_gap.shape)
+            az_peak, r_peak = tbins[tpeak_idx[-1]], rbins_gap[rpeak_idx[-1]]
+
     # peak brightness (in uJy)
     f_peak = 1e6 * raz_gap[tpeak_idx[-1], rpeak_idx[-1]]
 
@@ -68,5 +78,3 @@ for i in range(len(Fstr)):
         f.write('%.0f  %.0f  %s  %.3f  %.3f  %4i  %4i  %.3f\n' % \
                 (Fcpd[i], f_peak, mstr[i], rcpd[i], r_peak, azcpd[i], az_peak,
                  SNR))
-
-

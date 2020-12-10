@@ -1,10 +1,10 @@
 execfile('reduction_utils.py')
 
-def GWLup_imaging_script(infile, outfile):
+def fiducial_imaging_script(infile, outfile):
 
     mask_ra  = '15h46m44.709s'
     mask_dec = '-34.30.36.076'
-    mask_PA = 42
+    mask_PA = 110
     mask_maj = 1.3
     mask_min = 1.1
     fid_mask = 'ellipse[[%s, %s], [%.1farcsec, %.1farcsec], %.1fdeg]' % \

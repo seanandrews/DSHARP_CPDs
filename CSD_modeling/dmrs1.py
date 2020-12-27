@@ -31,9 +31,10 @@ rs = 1.5    # plot image extent of +/- (rs * rout) for each target
 dmr = ['data', 'model', 'resid']
 plt.style.use('default')
 plt.rc('font', size=6)
-left, right, bottom, top = 0.10, 0.90, 0.055, 0.99
-wspace, hspace = 0.02, 0.14
-fig = plt.figure(figsize=(3.5, 5.2))
+left, right, bottom, top = 0.09, 0.92, 0.05, 0.99
+wspace, hspace = 0.03, 0.15
+#fig = plt.figure(figsize=(3.5, 5.2))
+fig = plt.figure(figsize=(3.5, 5.4))
 gs = gridspec.GridSpec(5, 4, width_ratios=(1, 1, 1, 0.08),
                              height_ratios=(1, 1, 1, 1, 1))
 
@@ -42,7 +43,10 @@ for i in range(len(targets)):
 
     ### Prepare image plotting
     # parse header information into physical numbers
-    dfile = 'data/'+targets[i]+'_data.fits'
+    if (targets[i] == 'HD143006'):
+        dfile = 'data/'+targets[i]+'_data_symm.JvMcorr.fits'
+    else:
+        dfile = 'data/'+targets[i]+'_data.JvMcorr.fits'
     hd = fits.open(dfile)[0].header
     nx, ny = hd['NAXIS1'], hd['NAXIS2']
     RAo  = 3600 * hd['CDELT1'] * (np.arange(nx) - (hd['CRPIX1'] - 1))
@@ -67,7 +71,10 @@ for i in range(len(targets)):
     ### Loop through data, model, residual images
     for j in range(len(dmr)):
         # load image
-        dfile = 'data/'+targets[i]+'_'+dmr[j]+'.fits'
+        if (targets[i] == 'HD143006'):
+            dfile = 'data/'+targets[i]+'_'+dmr[j]+'_symm.JvMcorr.fits'
+        else:
+            dfile = 'data/'+targets[i]+'_'+dmr[j]+'.JvMcorr.fits'
         hdu = fits.open(dfile)
         img = np.squeeze(hdu[0].data)    
 
@@ -95,8 +102,10 @@ for i in range(len(targets)):
         ax.set_ylim(dDEC_lims)
         ax.set_yticks([-0.5, 0.0, 0.5])
         if (i == 4) and (j == 0):
-            ax.set_xlabel('RA offset  ($^{\prime\prime}$)', labelpad=3)
-            ax.set_ylabel('DEC offset  ($^{\prime\prime}$)', labelpad=-2)
+            ax.set_xlabel('RA offset  ($^{\prime\prime}$)', labelpad=2)
+            ax.set_ylabel('DEC offset  ($^{\prime\prime}$)', labelpad=-3)
+            ax.tick_params(axis='y', length=1.5)
+            ax.tick_params(axis='x', length=2)
         else:
             ax.set_xticklabels([])
             ax.set_yticklabels([])
@@ -105,10 +114,11 @@ for i in range(len(targets)):
 
     ### Colormap scalebar
     cbax = fig.add_subplot(gs[i,3])
+    cbax.tick_params(axis='y', length=2)
     cb = Colorbar(ax=cbax, mappable=im, orientation='vertical',
                   ticklocation='right', ticks=Tbticks[i])
     if (i == 4):
-        cb.set_label('$T_b$  (K)', rotation=270, labelpad=8)
+        cb.set_label('$T_b$  (K)', rotation=270, labelpad=6)
 
 
 # adjust full figure layout

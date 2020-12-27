@@ -168,7 +168,7 @@ class simple_disk:
         outer = (self.r_sky_f >= Rtrans)
         self.Tb_f[outer] = Tb_trans * (self.r_sky_f[outer] / Rtrans)**(-5.)
         gap1 = (self.r_sky_f >= 15.) & (self.r_sky_f <= 18.)
-        gap2 = (self.r_sky_f >= 70.) & (self.r_sky_f <= 77.)
+        gap2 = (self.r_sky_f >= 70.) & (self.r_sky_f <= 82.)
         self.Tb_f[gap1] *= 0.01
         self.Tb_f[gap2] *= 0.05
         self.Tb_f = np.clip(self.Tb_f, 0.0, self.Tbmax)

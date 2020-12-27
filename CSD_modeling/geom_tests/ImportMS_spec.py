@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-def ImportMS(msfile, modelfile, suffix='model', make_resid=False):
+def ImportMS_spec(msfile, modelfile, suffix='model', make_resid=False):
 
     # parse msfile name
     filename = msfile
@@ -13,11 +13,11 @@ def ImportMS(msfile, modelfile, suffix='model', make_resid=False):
     MS_filename = filename.replace('.ms', '')
 
     # copy the data MS into a model MS
-    os.system('rm -rf '+MS_filename+'.'+suffix+'.ms')
-    os.system('cp -r '+filename+' '+MS_filename+'.'+suffix+'.ms')
+    os.system('rm -rf '+suffix+'.ms')
+    os.system('cp -r '+filename+' '+suffix+'.ms')
 
     # open the model file and load the data
-    tb.open(MS_filename+'.'+suffix+'.ms')
+    tb.open(suffix+'.ms')
     data = tb.getcol("DATA")
     flag = tb.getcol("FLAG")
     tb.close()
@@ -26,13 +26,13 @@ def ImportMS(msfile, modelfile, suffix='model', make_resid=False):
     unflagged = np.squeeze(np.any(flag, axis=0) == False)
 
     # load the model visibilities
-    mdl = (np.load(modelfile+'.npz'))['V']
+    mdl = (np.load(modelfile+'.vis.npz'))['Vis']
 
     # replace with the model visibilities (equal in both polarizations)
     data[:, :, unflagged] = mdl
 
     # re-pack those model visibilities back into the .ms file
-    tb.open(MS_filename+'.'+suffix+'.ms', nomodify=False)
+    tb.open(suffix+'.ms', nomodify=False)
     tb.putcol("DATA", data)
     tb.flush()
     tb.close()

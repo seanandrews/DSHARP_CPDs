@@ -9,13 +9,16 @@ from scipy.interpolate import interp1d
 
 def remove_arc(disk, geom, rbounds, azbounds, rout=1.0, vmin=0, vmax=5e-6):
 
+    # create a FITS file of the CLEAN model image
+    os.system('casa --nologger -nologfile -c mk_cleanfits.py')
+
     # geometry estimate
     incl, PA, offRA, offDEC = geom
     inclr, PAr = np.radians(incl), np.radians(PA)
 
     ### Load the clean model contents and coordinates for plots
     # image and header
-    dhdu = fits.open('data/'+disk+'_data0.model.fits')
+    dhdu = fits.open('data/'+disk+'_data.cleanmodel.fits')
     dimg, hdr = np.squeeze(dhdu[0].data), dhdu[0].header
 
     # parse coordinate frame
@@ -58,7 +61,7 @@ def remove_arc(disk, geom, rbounds, azbounds, rout=1.0, vmin=0, vmax=5e-6):
     imgx = np.empty_like(rdx)
     for i in range(len(rdx)):
         inbin = ((rd_na >= rdx[i] - 0.5*drdx) & (rd_na < rdx[i] + 0.5*drdx))
-        imgx[i] = np.median(img_na[inbin])
+        imgx[i] = np.average(img_na[inbin]) #np.median(img_na[inbin])
     
 
     # remove the median profile from the arc-only model
@@ -72,16 +75,15 @@ def remove_arc(disk, geom, rbounds, azbounds, rout=1.0, vmin=0, vmax=5e-6):
 
 
     # save these models into .FITS files
-    ohdu = fits.open('data/'+disk+'_data0.model.fits')
+    ohdu = fits.open('data/'+disk+'_data.cleanmodel.fits')
     ohdu[0].data = np.expand_dims(np.expand_dims(arc_img, 0), 0)
-    ohdu.writeto('data/'+disk+'_data_arc.model.fits', overwrite=True)
+    ohdu.writeto('data/'+disk+'_data_arc.cleanmodel.fits', overwrite=True)
     ohdu.close()
 
-    ohdu = fits.open('data/'+disk+'_data0.model.fits')
+    ohdu = fits.open('data/'+disk+'_data.cleanmodel.fits')
     ohdu[0].data = np.expand_dims(np.expand_dims(arcless_img, 0), 0)
-    ohdu.writeto('data/'+disk+'_data_noarc.model.fits', overwrite=True)
+    ohdu.writeto('data/'+disk+'_data_noarc.cleanmodel.fits', overwrite=True)
     ohdu.close()
-
 
     # run the associated CASA script to get the appropriate visibilities
-    os.system('casa --nologger --nologfile -c extract_'+disk+'.py')
+    os.system('casa --nologger --nologfile -c extract_arc.py')

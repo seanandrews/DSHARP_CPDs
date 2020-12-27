@@ -4,21 +4,14 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.colorbar import Colorbar
-import matplotlib.colors as mcolors
 from matplotlib.patches import Ellipse
-from astropy.visualization import (LinearStretch, ImageNormalize)
-from deproject_vis import deproject_vis
+from astropy.visualization import (AsinhStretch, ImageNormalize)
 sys.path.append('../')
 import diskdictionary as disk
 
 
 # set color map
-c2 = plt.cm.Reds(np.linspace(0, 1, 32))
-c1 = plt.cm.Blues_r(np.linspace(0, 1, 32))
-c1 = np.vstack([c1, np.ones((26, 4))])
-colors = np.vstack((c1, c2))
-mymap = mcolors.LinearSegmentedColormap.from_list('eddymap', colors)
-cmap = mymap
+cmap = 'inferno'
 
 
 # target-specific inputs
@@ -31,11 +24,13 @@ xyticks = [[-0.2, 0.0, 0.2],
            [-0.5, 0.0, 0.5],
            [-0.5, 0.0, 0.5],
            [-0.5, 0.0, 0.5],
-           [-1, 0.0, 1],
+           [-1.0, -0.5, 0.0, 0.5, 1.0],
            [-1, 0.0, 1.0],
            [-1.0, 0.0, 1.0]]
  
-vspan = 10
+# constants
+c_ = 2.99792e10
+k_ = 1.38057e-16
 
 
 # plotting conventions
@@ -54,14 +49,15 @@ for i in range(len(targets)):
     ### Prepare image plotting
     # parse header information into physical numbers
     if np.logical_or((targets[i] == 'HD143006'), (targets[i] == 'HD163296')):
-        hd = fits.open('data/'+targets[i]+'_resid_symm.JvMcorr.fits')[0].header
+        hd = fits.open('data/'+targets[i]+'_data_symm.JvMcorr.fits')[0].header
     else:
-        hd = fits.open('data/'+targets[i]+'_resid.JvMcorr.fits')[0].header
+        hd = fits.open('data/'+targets[i]+'_data.JvMcorr.fits')[0].header
     nx, ny = hd['NAXIS1'], hd['NAXIS2']
     RAo  = 3600 * hd['CDELT1'] * (np.arange(nx) - (hd['CRPIX1'] - 1))
     DECo = 3600 * hd['CDELT2'] * (np.arange(ny) - (hd['CRPIX2'] - 1))
     dRA, dDEC = np.meshgrid(RAo - disk.disk[targets[i]]['dx'], 
                             DECo - disk.disk[targets[i]]['dy'])
+    freq = hd['CRVAL3']
 
     # beam parameters 
     bmaj, bmin, bPA = 3600 * hd['BMAJ'], 3600 * hd['BMIN'], hd['BPA']
@@ -73,77 +69,79 @@ for i in range(len(targets)):
     dRA_lims, dDEC_lims = [rs*rout, -rs*rout], [-rs*rout, rs*rout]
 
     # intensity limits, and stretch
-    norm = ImageNormalize(vmin=-vspan, vmax=vspan, stretch=LinearStretch())
+    norm = ImageNormalize(vmin=0, vmax=disk.disk[targets[i]]['maxTb'], 
+                          stretch=AsinhStretch())
 
     # set location in figure
     ax = fig.add_subplot(gs[np.floor_divide(i, 3), i%3])
 
     # load image
     if np.logical_or((targets[i] == 'HD143006'), (targets[i] == 'HD163296')):
-        hdu = fits.open('data/'+targets[i]+'_resid_symm.JvMcorr.fits')
+        hdu = fits.open('data/'+targets[i]+'_data_symm.JvMcorr.fits')
     else:
-        hdu = fits.open('data/'+targets[i]+'_resid.JvMcorr.fits')
-    img = 1e6 * np.squeeze(hdu[0].data) / disk.disk[targets[i]]['RMS']
+        hdu = fits.open('data/'+targets[i]+'_data.JvMcorr.fits')
+    img = np.squeeze(hdu[0].data) 
+    Tb = (1e-23 * img / barea) * c_**2 / (2 * k_ * freq**2)
 
-    # plot the image (in uJy / beam units)
-    im = ax.imshow(img, origin='lower', cmap=cmap, extent=im_bounds,
+    # plot the image (in K units)
+    im = ax.imshow(Tb, origin='lower', cmap=cmap, extent=im_bounds,
                    norm=norm, aspect='equal')
 
     # annotations
     tt = np.linspace(-np.pi, np.pi, 181)
     inclr = np.radians(disk.disk[targets[i]]['incl'])
     PAr = np.radians(disk.disk[targets[i]]['PA'])
-    rgap = disk.disk[targets[i]]['rgap'][::-1]
-    wgap = disk.disk[targets[i]]['wgap'][::-1]
-    wbm = np.sqrt(bmaj * bmin) / 2.355
-    gcols = ['k', 'darkgray']
-    for ir in range(len(rgap)):
-        xgi = (rgap[ir] - wgap[ir] - wbm) * np.cos(tt) * np.cos(inclr) 
-        ygi = (rgap[ir] - wgap[ir] - wbm) * np.sin(tt)
+    rgapi = disk.disk[targets[i]]['rgapi'][::-1]
+    rgapo = disk.disk[targets[i]]['rgapo'][::-1]
+    gcols = ['w', 'w']
+    for ir in range(len(rgapi)):
+        xgi = rgapi[ir] * np.cos(tt) * np.cos(inclr) 
+        ygi = rgapi[ir] * np.sin(tt)
         ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
                 -xgi * np.sin(PAr) + ygi * np.cos(PAr), '-', color=gcols[ir],
                 lw=0.5, alpha=0.5)
-        xgo = (rgap[ir] + wgap[ir] + wbm) * np.cos(tt) * np.cos(inclr)
-        ygo = (rgap[ir] + wgap[ir] + wbm) * np.sin(tt)
+        xgo = rgapo[ir] * np.cos(tt) * np.cos(inclr)
+        ygo = rgapo[ir] * np.sin(tt)
         ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
                 -xgo * np.sin(PAr) + ygo * np.cos(PAr), '-', color=gcols[ir],
                 lw=0.5, alpha=0.5)
 
-    xb, yb = rout * np.cos(tt) * np.cos(inclr), rout * np.sin(tt)
-    ax.plot( xb * np.cos(PAr) + yb * np.sin(PAr),
-            -xb * np.sin(PAr) + yb * np.cos(PAr), ':', color='gray',
-            lw=0.5, alpha=0.5)
+    gcols = ['g', 'g']
+    rgap = disk.disk[targets[i]]['rgap']
+    wgap = disk.disk[targets[i]]['wgap']
+    wbm = 0#np.sqrt(bmaj * bmin) / 2.355
+    for ir in range(len(rgap)):
+        xgi = (rgap[ir] - 0.5*wgap[ir] - wbm) * np.cos(tt) * np.cos(inclr)
+        ygi = (rgap[ir] - 0.5*wgap[ir] - wbm) * np.sin(tt)
+        ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
+                -xgi * np.sin(PAr) + ygi * np.cos(PAr), '-', color=gcols[ir],
+                lw=0.5)
+        xgo = (rgap[ir] + 0.5*wgap[ir] + wbm) * np.cos(tt) * np.cos(inclr)
+        ygo = (rgap[ir] + 0.5*wgap[ir] + wbm) * np.sin(tt)
+        ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
+                -xgo * np.sin(PAr) + ygo * np.cos(PAr), '-', color=gcols[ir],
+                lw=0.5)
 
     # clean beams
     beam = Ellipse((dRA_lims[0] + 0.1*np.diff(dRA_lims),
                     dDEC_lims[0] + 0.1*np.diff(dDEC_lims)), bmaj, bmin, 90-bPA)
-    beam.set_facecolor('k')
+    beam.set_facecolor('w')
     ax.add_artist(beam)
 
     # limits and labeling
     ax.text(dRA_lims[0] + 0.05*np.diff(dRA_lims),
             dDEC_lims[1] - 0.09*np.diff(dDEC_lims), 
-            disk.disk[targets[i]]['label'], color='k')
+            disk.disk[targets[i]]['label'], color='w')
     ax.set_xlim(dRA_lims)
     ax.set_ylim(dDEC_lims)
     ax.set_xticks((xyticks[i])[::-1])
     ax.set_yticks(xyticks[i])
     if (i == 6):
         ax.set_xlabel('RA offset  ($^{\prime\prime}$)')
-        ax.set_ylabel('DEC offset  ($^{\prime\prime}$)', labelpad=8)
-
-
-# colorbar
-cbax = fig.add_axes([right + 0.01, 0.5*(top+bottom)-0.25, 0.02, 0.50])
-cb = Colorbar(ax=cbax, mappable=im, orientation='vertical',
-              ticklocation='right', 
-              ticks=[-10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10])	#, ticks=[0, 5, 10, 20, 30, 40])
-#cbax.set_yticklabels(['0', '2', '5', '10', '20', '50'])
-#cbax.tick_params('both', length=3, direction='in', which='major')
-cb.set_label('residual S/N', rotation=270, labelpad=10)
+        ax.set_ylabel('DEC offset  ($^{\prime\prime}$)')
 
 
 # adjust full figure layout
 fig.subplots_adjust(wspace=wspace, hspace=hspace)
 fig.subplots_adjust(left=left, right=right, bottom=bottom, top=top)
-fig.savefig('../figs/resid_maps.pdf')
+fig.savefig('../figs/data_maps.pdf')

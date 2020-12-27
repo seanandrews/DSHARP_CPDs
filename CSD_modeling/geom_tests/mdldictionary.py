@@ -1,0 +1,25 @@
+disk = {}
+
+disk['dx1mas'] =   {'name': 'dx1mas', 
+                    'label': 'dx 1mas', 
+                    'distance': 155.2, 
+                    'incl': 35.0, 
+                    'PA': 110.0, 
+                    'dx': 0.000,
+                    'dy': 0.000,
+                    'rgapi': [15./140., 70./140.],
+                    'rgapo': [18./140., 82./140.],
+                    'rout': 1.1, 
+                    'maxTb': 20,
+                    'hyp-alpha': 1.3,
+                    'hyp-wsmth': 0.1,
+                    'hyp-Ncoll': 300,
+                    'cmask': 'ellipse[[15h46m44.709s, -34.30.36.076], 
+                                      [1.3arcsec, 1.1arcsec], 110deg]',
+                    'cscales': [0, 20, 50, 100, 200],
+                    'cthresh': '0.05mJy',
+                    'crobust': 0.5,
+                    'ctaper': ['0.035arcsec', '0.015arcsec', '0deg'],
+                    'cgain': 0.3,
+                    'ccycleniter': 300
+}

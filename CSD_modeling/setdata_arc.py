@@ -10,18 +10,30 @@ from astropy.visualization import (AsinhStretch, LinearStretch, ImageNormalize)
 from frank.radial_fitters import FrankFitter
 from frank.geometry import FixedGeometry
 from frank.io import save_fit
+from remove_arc import remove_arc
 sys.path.append('../')
 import diskdictionary as disk
 
 
 # controls
-target = 'AS209'
+target = 'HD143006'
+rbounds = [0.37, 0.60]
+azbounds = [90., 142.]
 
-frank  = True
-im_dat = True
-im_res = True
-im_mdl = True
-annotate_res = True
+target = 'HD163296'
+rbounds = [0.48, 0.60]
+azbounds = [50., 150.]
+
+im_dat = False
+rm_az = False
+im_dat_symm = False
+frank = False
+frank_symm = False
+im_res = False
+im_res_symm = False
+im_mdl = False
+im_mdl_symm = False
+annotate_res = False
 
 
 
@@ -43,7 +55,8 @@ f.write(target)
 f.close()
 
 
-### - IMAGE THE DATA
+
+### - IMAGE THE DATA (ASYMMETRIC; as observed)
 if im_dat:
     print('....')
     print('Imaging the data')
@@ -105,7 +118,7 @@ rms_Tb = (1e-23 * 1e-6 * disk.disk[target]['RMS'] / beam_area) * \
 print(rms_Tb)
 
 # draw a contour level for 2 * RMS
-ax.contour(dRA, dDEC, Tb, [2 * rms_Tb], colors='y')
+#ax.contour(dRA, dDEC, Tb, [2 * rms_Tb], colors='y')
 
 # annotations
 tbins = np.linspace(-np.pi, np.pi, 181)
@@ -150,36 +163,26 @@ fig.savefig('../figs/'+target+'_dataimage.pdf')
 
 
 
-### - AZIMUTHALLY-AVERAGED PROFILE
-# compute the profile
-rbins = np.arange(hd['CDELT2'] * 3600, 1.5*rout, hd['CDELT2'] * 3600)
-dr = np.abs(np.mean(np.diff(rbins)))
-SBr, err_SBr = np.empty(len(rbins)), np.empty(len(rbins))
-for i in range(len(rbins)):
-    in_annulus = ((r >= rbins[i] - 0.5 * dr) & (r < (rbins[i] + 0.5 * dr)))
-    SBr[i], err_SBr[i] = np.average(Tb[in_annulus]), np.std(Tb[in_annulus])
+### - REMOVE THE AZIMUTHAL ASYMMETRY
+if rm_az:
+    print('....')
+    print('Removing azimuthal asymmetry')
+    print('....')
+    geom = disk.disk[target]['incl'], disk.disk[target]['PA'], \
+           disk.disk[target]['dx'], disk.disk[target]['dy']
+    remove_arc(target, geom, rbounds, azbounds, rout=disk.disk[target]['rout'], 
+               vmin=0, vmax=disk.disk[target]['maxTb'])
 
-# basic plot
-fig, ax = plt.subplots(figsize=(7.0, 4.5))
-ax.plot(rbins, SBr)
 
-# annotations
-for ir in range(len(disk.disk[target]['rgapi'])):
-    ri, ro = disk.disk[target]['rgapi'][ir], disk.disk[target]['rgapo'][ir]
-    ax.plot([ri, ri], [0.2, 200], ':k')
-    ax.plot([ro, ro], [0.2, 200], ':k')
-ax.plot([rout, rout], [0.2, 200], '--k')
-
-# labeling
-ax.set_xlim(0, 1.5*rout)
-ax.set_ylim(0.2, 200)
-ax.set_yscale('log')
-ax.set_yticks([1, 10, 100])
-ax.set_yticklabels(['1', '10', '100'])
-ax.set_xlabel('radius  ($^{\prime\prime}$)')
-ax.set_ylabel('brightness temperature  (K)')
-fig.savefig('../figs/'+target+'_SBr.pdf')
-
+### - IMAGE THE DATA (SYMMETRIC!)
+if im_dat_symm:
+    print('....')
+    print('Imaging the data')
+    print('....')
+    os.system('casa --nogui --nologger --nologfile -c data_symm_imaging.py')
+    print('....')
+    print('Finished imaging the data')
+    print('....')
 
 
 ### - FRANK VISIBILITY MODELING 
@@ -212,24 +215,59 @@ if frank:
     print('....')
 
 
+if frank_symm:
+    print('....')
+    print('Performing visibility modeling')
+    print('....')
+
+    # load the visibility data
+    dat = np.load('data/'+target+'_data_symm.vis.npz')
+    u, v, vis, wgt = dat['u'], dat['v'], dat['Vis'], dat['Wgt']
+
+    # set the disk viewing geometry
+    geom = FixedGeometry(disk.disk[target]['incl'], disk.disk[target]['PA'],
+                         dRA=disk.disk[target]['dx'],
+                         dDec=disk.disk[target]['dy'])
+
+    # configure the fitting code setup
+    FF = FrankFitter(Rmax=2*disk.disk[target]['rout'], geometry=geom,
+                     N=disk.disk[target]['hyp-Ncoll'],
+                     alpha=disk.disk[target]['hyp-alpha'],
+                     weights_smooth=disk.disk[target]['hyp-wsmth'])
+
+    # fit the visibilities
+    sol = FF.fit(u, v, vis, wgt)
+
+    # save the fit
+    save_fit(u, v, vis, wgt, sol, prefix='fits/'+target+'_symm') 
+    print('....')
+    print('Finished visibility modeling')
+    print('....')
+
 
 ### Imaging
 if im_res:
+    os.system('casa --nogui --nologger -nologfile -c resid_imaging.py')
+
+if im_res_symm:
     print('....')
-    print('Imaging residuals')
+    print('Imaging (symmetric) residuals')
     print('....')
-    os.system('casa --nogui --nologger --nologfile -c resid_imaging.py')
+    os.system('casa --nogui --nologger --nologfile -c resid_symm_imaging.py')
     print('....')
-    print('Finished imaging residuals')
+    print('Finished imaging (symmetric) residuals')
     print('....')
 
 if im_mdl:
+    os.system('casa --nogui -nologger -nologfile -c model_imaging.py')
+
+if im_mdl_symm:
     print('....')
-    print('Imaging model')
+    print('Imaging (symmetric) model')
     print('....')
-    os.system('casa --nogui --nologerr --nologfile -c model_imaging.py') 
+    os.system('casa --nogui --nologger --nologfile -c model_symm_imaging.py') 
     print('....')
-    print('Finished imaging model')
+    print('Finished imaging (symmetric) model')
     print('....')
 
 
@@ -252,7 +290,7 @@ if os.path.exists('data/'+target+'_resid.JvMcorr.fits'):
 
     # image (sky-plane)
     ax = fig.add_subplot(gs[0,0])
-    vmin, vmax = -170, 170    # these are in microJy/beam units
+    vmin, vmax = -100, 100    # these are in microJy/beam units
     norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
     im = ax.imshow(1e6*rimg, origin='lower', cmap=mymap, extent=im_bounds, 
                    norm=norm, aspect='equal')

@@ -33,7 +33,7 @@ mymap = mcolors.LinearSegmentedColormap.from_list('eddymap', colors)
 
 plt.style.use('default')
 plt.rc('font', size=21)
-xyticks = [-1, 0, 1]
+xyticks = [-0.5, 0, 0.5]
 
 
 # files
@@ -72,8 +72,10 @@ for i in range(len(im_files)):
 
     # image setups
     rout = disk.disk[target]['rout']
+    print(rout)
     im_bounds = (dRA.max(), dRA.min(), dDEC.min(), dDEC.max())
-    dRA_lims, dDEC_lims = [1.05*rout, -1.05*rout], [-1.05*rout, 1.05*rout]
+    dRA_lims, dDEC_lims = [1.15*rout, -1.15*rout], [-1.15*rout, 1.15*rout]
+    print(dRA_lims, dDEC_lims)
 
     # intensity limits, and stretch
     if (i >= 8):

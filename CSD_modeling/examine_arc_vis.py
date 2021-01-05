@@ -84,8 +84,16 @@ for i in range(len(vispack)):
     ax.set_xlim([0.015, 10])
     ax.set_xscale('log')
     ax.set_xticklabels([])
-    ax.set_ylim([-0.2 * vmax, 1.02 * vmax])
-    ax.set_ylabel('real  (mJy)', labelpad=21)
+    if (i == 6):
+        iscl = 0.25
+    else:
+        iscl = 1
+    ax.set_ylim([-0.2 * iscl * vmax, 1.02 * iscl * vmax])
+    if (i == 6):
+        lblpad = 21
+    else:
+        lblpad = 21
+    ax.set_ylabel('real  (mJy)', labelpad=lblpad)
 
     # Imags
     ax = fig.add_subplot(gs[1,0])
@@ -95,7 +103,7 @@ for i in range(len(vispack)):
     ax.set_xscale('log')
     ax.set_xticks([0.1, 1, 10])
     ax.set_xticklabels(['0.1', '1', '10'])
-    iscale = 0.25 * 1.22 * vmax / 2
+    iscale = 0.25 * 1.22 * iscl * vmax / 2
     ax.set_ylim([-iscale, iscale])
     ax.set_ylabel('imag', labelpad=17)
     ax.set_xlabel('deprojected baseline  (M$\\lambda$)')

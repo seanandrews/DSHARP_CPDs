@@ -3,7 +3,7 @@ import numpy as np
 execfile('reduction_utils.py')
 execfile('JvM_correction_brief.py')
 execfile('ImportMS.py')
-sys.path.append('../')
+sys.path.append('.')
 import diskdictionary as disk
 
 # specify target disk and gap

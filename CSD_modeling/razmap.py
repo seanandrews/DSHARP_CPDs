@@ -93,7 +93,7 @@ def razmap(imfits, rbins, tbins, incl=0, PA=0, offx=0, offy=0):
 
     class raz_out:
         def __init__(self, raz_map, raz_int_flags, r, az, prof, eprof, 
-                     bmaj, bmin, bpa):
+                     bmaj, bmin, bpa, image, dRA, dDEC):
             self.raz_map = raz_map
             self.raz_int_flags = raz_int_flags
             self.r = r
@@ -103,5 +103,8 @@ def razmap(imfits, rbins, tbins, incl=0, PA=0, offx=0, offy=0):
             self.bmaj = bmaj
             self.bmin = bmin
             self.bpa = bpa
+            self.image = image
+            self.dRA = dRA
+            self.dDEC = dDEC
 
-    return raz_out(rtmap, int_flags, rbins, tbins, SBr, err_SBr, bmaj, bmin, bPA)
+    return raz_out(rtmap, int_flags, rbins, tbins, SBr, err_SBr, bmaj, bmin, bPA, img, dRA, dDEC)

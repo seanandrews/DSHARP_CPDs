@@ -8,14 +8,14 @@ import diskdictionary as disk
 
 
 # specify target disk and gap
-target = 'Elias24'	# CSD name
+target = 'RULup'	# CSD name
 gap_ix = 0		# which gap CPD is in (based on dict list)
 subsuf = '0'		# suffix to attach to records (if partial work)
 
 
 # specify mock parameters
 F_cpd = np.arange(0.25, 0.00, -0.01)        # in mJy
-n_mocks_per_F = 500 			    # number of mocks per flux bin
+n_mocks_per_F = 500  			    # number of mocks per flux bin
 
 
 # -------

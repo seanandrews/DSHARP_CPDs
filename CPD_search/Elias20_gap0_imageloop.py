@@ -7,7 +7,7 @@ sys.path.append('.')
 import diskdictionary as disk
 
 # specify target disk and gap
-target = 'Elias24'
+target = 'Elias20'
 gap_ix = 0
 subsuf = '0'
 

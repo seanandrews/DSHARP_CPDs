@@ -15,7 +15,7 @@ c1 = plt.cm.Blues_r(np.linspace(0, 1, 32))
 c1 = np.vstack([c1, np.ones((26, 4))])
 colors = np.vstack((c1, c2))
 cmap = mcolors.LinearSegmentedColormap.from_list('eddymap', colors)
-vspan = 10
+vspan = 5
 
 # targets
 targets = ['GWLup', 'Elias24', 'HD163296', 'AS209']
@@ -67,19 +67,39 @@ for i in range(len(targets)):
                    aspect='auto')
 
     # mark the gaps
-    rgap = disk.disk[targets[i]]['rgap'][::-1]
-    wgap = disk.disk[targets[i]]['wgap'][::-1]
+    hatch = 'XXX'
+    hatchcol = 'darkgray'
+    hatchalp = 0.2
+    plt.rc('hatch', linewidth=0.5)
+
+    rgap = disk.disk[targets[i]]['rgap']
+    wgap = disk.disk[targets[i]]['wgap']
     wbm = np.sqrt(rt.bmaj * rt.bmin) / 2.355
-    gcols = ['k', 'darkgray']
+    ax.fill_between([0, rgap[0]-wgap[0]-wbm], [tlims[1], tlims[1]],
+                    [tlims[0], tlims[0]], facecolor='none', alpha=hatchalp,
+                    hatch=hatch, edgecolor=hatchcol, linewidth=0.0)
+    if (len(rgap) == 1):
+        ax.fill_between([rgap[0]+wgap[0]+wbm, rlims[1]], [tlims[1], tlims[1]],
+                        [tlims[0], tlims[0]], facecolor='none', alpha=hatchalp,
+                        hatch=hatch, edgecolor=hatchcol, linewidth=0.0)
+    else:
+        ax.fill_between([rgap[0]+wgap[0]+wbm, rgap[1]-wgap[1]-wbm],
+                        [tlims[1], tlims[1]], [tlims[0], tlims[0]],
+                        facecolor='none', alpha=hatchalp, hatch=hatch,
+                        edgecolor=hatchcol, linewidth=0.0)
+        ax.fill_between([rgap[1]+wgap[1]+wbm, rlims[1]], [tlims[1], tlims[1]],
+                        [tlims[0], tlims[0]], facecolor='none', alpha=hatchalp,
+                        hatch=hatch, edgecolor=hatchcol, linewidth=0.0)
     for ir in range(len(rgap)):
-        ax.plot([rgap[ir] - wgap[ir] - wbm, rgap[ir] - wgap[ir] - wbm],
-                tlims, '-', color=gcols[ir], lw=0.5, alpha=0.5)
-        ax.plot([rgap[ir] + wgap[ir] + wbm, rgap[ir] + wgap[ir] + wbm],
-                tlims, '-', color=gcols[ir], lw=0.5, alpha=0.5)
+        ax.plot([rgap[ir] - wgap[ir], rgap[ir] - wgap[ir]],
+                tlims, ':k', lw=0.5, alpha=0.5)
+        ax.plot([rgap[ir] + wgap[ir], rgap[ir] + wgap[ir]],
+                tlims, ':k', lw=0.5, alpha=0.5)
 
     # limits and labeling
     ax.text(rlims[1] - 0.035*np.diff(rlims), tlims[1] - 0.18*np.diff(tlims),
-            disk.disk[targets[i]]['label'], ha='right', color='k', fontsize=6)
+            disk.disk[targets[i]]['label'], ha='right', color='k', fontsize=6,
+            bbox={'facecolor': 'w', 'edgecolor': 'w', 'pad': 2})
     ax.set_xlim(rlims)
     ax.set_ylim(tlims)
     ax.set_yticks([-180, -90, 0, 90, 180])
@@ -97,8 +117,8 @@ for i in range(len(targets)):
 # colorbar
 cbax = fig.add_axes([right + 0.02, bottom, 0.025, 0.455])
 cb = Colorbar(ax=cbax, mappable=im, orientation='vertical', 
-              ticklocation='right',
-              ticks=[-10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10])
+              ticklocation='right')#,
+#              ticks=[-10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10])
 cbax.tick_params('both', length=2.5, direction='out', which='major')
 cb.set_label('residual S/N', rotation=270, labelpad=5)
 

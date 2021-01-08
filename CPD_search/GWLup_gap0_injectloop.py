@@ -4,7 +4,6 @@ from inject_CPD import inject_CPD
 from frank.geometry import FixedGeometry
 from frank.radial_fitters import FrankFitter
 from frank.io import save_fit
-sys.path.append('../')
 import diskdictionary as disk
 
 
@@ -16,9 +15,8 @@ subsuf = '0'		# suffix to attach to records (if partial work)
 
 # specify mock parameters
 F_cpd = np.arange(0.25, 0.00, -0.01)        # in mJy
-n_mocks_per_F = 500			    # number of mocks per flux bin
+n_mocks_per_F = 500  			    # number of mocks per flux bin
 
-sys.exit()
 
 # -------
 
@@ -49,7 +47,7 @@ for i in range(len(F_cpd)):
 
     # assign random radii and azimuths for mock CPDs (in disk plane)
     rgap_cen = disk.disk[target]['rgap'][gap_ix]
-    gap_span = 0.67 * disk.disk[target]['wgap'][gap_ix]
+    gap_span = 0.5 * disk.disk[target]['wgap'][gap_ix]
     r_cpd = np.random.uniform(rgap_cen - gap_span, rgap_cen + gap_span, 
                               n_mocks_per_F)
     az_cpd = np.random.randint(-180, 180, n_mocks_per_F)

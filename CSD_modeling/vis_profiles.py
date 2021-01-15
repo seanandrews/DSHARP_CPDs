@@ -13,6 +13,16 @@ targets = ['SR4', 'RULup', 'Elias20',
            'Sz129', 'HD143006', 'GWLup',
            'Elias24', 'HD163296', 'AS209']
 
+iticks = [ [-10, -5, 0, 5, 10],
+           [-20, 0, 20], 
+           [-10, 0, 10],
+           [-10, 0, 10],
+           [-5, 0, 5],
+           [-10, 0, 10],
+           [-30, 0, 30],
+           [-100, -50, 0, 50, 100],
+           [-30, 0, 30] ]
+
 # plotting conventions
 plt.style.use('classic')
 plt.rc('font', size=7)
@@ -70,27 +80,28 @@ for i in range(len(targets)):
     # -- REALS
     axr = fig.add_subplot(gs[3 * np.floor_divide(i, 3), i % 3])
     axr.plot([0.01, 10], [0, 0], ':k', lw=0.5)
-    axr.plot(1e-6 * dvp.rho_uv, 1e3 * dvp.vis_prof.real, 'dimgray', lw=4)
-    axr.plot(1e-6 * mvp.rho_uv, 1e3 * mvp.vis_prof.real, 'r', lw=0.5)
+    axr.plot(1e-6 * dvp.rho_uv, 1e3 * dvp.vis_prof.real, 'darkgray', lw=3)
+    axr.plot(1e-6 * mvp.rho_uv, 1e3 * mvp.vis_prof.real, 'r')
     axr.set_xlim([0.015, 10])
     axr.set_xscale('log')
     axr.set_xticklabels([])
     axr.set_ylim([-0.2 * 1e3 * dvp.vis_prof.real.max(), 
                   1.02 * 1e3 * dvp.vis_prof.real.max()])
-    axr.text(0.96, 0.9, disk.disk[targets[i]]['label'], ha='right', 
+    axr.text(0.94, 0.89, disk.disk[targets[i]]['label'], ha='right', 
              va='center', transform=axr.transAxes)
     
     # -- IMAGS
     axi = fig.add_subplot(gs[3 * np.floor_divide(i, 3) + 1, i % 3])
     axi.plot([0.01, 10], [0, 0], ':k', lw=0.5)
-    axi.plot(1e-6 * dvp.rho_uv, 1e3 * dvp.vis_prof.imag, 'dimgray', lw=4)
-    axi.plot(1e-6 * mvp.rho_uv, 1e3 * mvp.vis_prof.imag, 'r', lw=0.5)
+    axi.plot(1e-6 * dvp.rho_uv, 1e3 * dvp.vis_prof.imag, 'darkgray', lw=3)
+    axi.plot(1e-6 * mvp.rho_uv, 1e3 * mvp.vis_prof.imag, 'r')
     axi.set_xlim([0.015, 10])
     axi.set_xscale('log')
     axi.set_xticks([0.1, 1, 10])
     axi.set_xticklabels(['0.1', '1', '10'])
     iscale = hr * 1.22 * 1e3 * dvp.vis_prof.real.max() / 2 
     axi.set_ylim([-iscale, iscale])
+    axi.set_yticks(iticks[i])
 
     # targeted labeling
     if (i == 6):

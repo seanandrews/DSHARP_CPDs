@@ -90,28 +90,28 @@ for i in range(len(targets)):
                    norm=norm, aspect='equal')
 
     # annotations
-    tt = np.linspace(-np.pi, np.pi, 181)
+    tt = np.linspace(-np.pi, np.pi, 91)
     inclr = np.radians(disk.disk[targets[i]]['incl'])
     PAr = np.radians(disk.disk[targets[i]]['PA'])
     rgap = disk.disk[targets[i]]['rgap'][::-1]
     wgap = disk.disk[targets[i]]['wgap'][::-1]
     wbm = np.sqrt(bmaj * bmin) / 2.355
-    gcols = ['k', 'darkgray']
+    gcols = ['k', 'dimgrey']
     for ir in range(len(rgap)):
         xgi = (rgap[ir] - wgap[ir] - wbm) * np.cos(tt) * np.cos(inclr) 
         ygi = (rgap[ir] - wgap[ir] - wbm) * np.sin(tt)
         ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
                 -xgi * np.sin(PAr) + ygi * np.cos(PAr), '-', color=gcols[ir],
-                lw=0.5, alpha=0.5)
+                lw=0.8, alpha=0.8)
         xgo = (rgap[ir] + wgap[ir] + wbm) * np.cos(tt) * np.cos(inclr)
         ygo = (rgap[ir] + wgap[ir] + wbm) * np.sin(tt)
         ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
                 -xgo * np.sin(PAr) + ygo * np.cos(PAr), '-', color=gcols[ir],
-                lw=0.5, alpha=0.5)
+                lw=0.8, alpha=0.8)
 
     xb, yb = rout * np.cos(tt) * np.cos(inclr), rout * np.sin(tt)
     ax.plot( xb * np.cos(PAr) + yb * np.sin(PAr),
-            -xb * np.sin(PAr) + yb * np.cos(PAr), ':', color='gray',
+            -xb * np.sin(PAr) + yb * np.cos(PAr), '--', color='gray',
             lw=0.5, alpha=0.5)
 
     # clean beams

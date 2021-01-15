@@ -91,33 +91,18 @@ for i in range(len(targets)):
     tt = np.linspace(-np.pi, np.pi, 181)
     inclr = np.radians(disk.disk[targets[i]]['incl'])
     PAr = np.radians(disk.disk[targets[i]]['PA'])
-    rgapi = disk.disk[targets[i]]['rgapi'][::-1]
-    rgapo = disk.disk[targets[i]]['rgapo'][::-1]
-    gcols = ['w', 'w']
-    for ir in range(len(rgapi)):
-        xgi = rgapi[ir] * np.cos(tt) * np.cos(inclr) 
-        ygi = rgapi[ir] * np.sin(tt)
-        ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
-                -xgi * np.sin(PAr) + ygi * np.cos(PAr), '-', color=gcols[ir],
-                lw=0.5, alpha=0.5)
-        xgo = rgapo[ir] * np.cos(tt) * np.cos(inclr)
-        ygo = rgapo[ir] * np.sin(tt)
-        ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
-                -xgo * np.sin(PAr) + ygo * np.cos(PAr), '-', color=gcols[ir],
-                lw=0.5, alpha=0.5)
-
     gcols = ['g', 'g']
     rgap = disk.disk[targets[i]]['rgap']
     wgap = disk.disk[targets[i]]['wgap']
-    wbm = 0#np.sqrt(bmaj * bmin) / 2.355
+    wbm = np.sqrt(bmaj * bmin) / 2.355
     for ir in range(len(rgap)):
-        xgi = (rgap[ir] - 0.5*wgap[ir] - wbm) * np.cos(tt) * np.cos(inclr)
-        ygi = (rgap[ir] - 0.5*wgap[ir] - wbm) * np.sin(tt)
+        xgi = (rgap[ir] - wgap[ir] - wbm) * np.cos(tt) * np.cos(inclr)
+        ygi = (rgap[ir] - wgap[ir] - wbm) * np.sin(tt)
         ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
                 -xgi * np.sin(PAr) + ygi * np.cos(PAr), '-', color=gcols[ir],
                 lw=0.5)
-        xgo = (rgap[ir] + 0.5*wgap[ir] + wbm) * np.cos(tt) * np.cos(inclr)
-        ygo = (rgap[ir] + 0.5*wgap[ir] + wbm) * np.sin(tt)
+        xgo = (rgap[ir] + wgap[ir] + wbm) * np.cos(tt) * np.cos(inclr)
+        ygo = (rgap[ir] + wgap[ir] + wbm) * np.sin(tt)
         ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
                 -xgo * np.sin(PAr) + ygo * np.cos(PAr), '-', color=gcols[ir],
                 lw=0.5)

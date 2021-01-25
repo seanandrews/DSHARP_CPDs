@@ -15,12 +15,12 @@ import diskdictionary as disk
 
 
 # controls
-target = 'AS209'
+target = 'Elias24'
 
-frank  = True
-im_dat = True
+frank  = False
+im_dat = False
 im_res = True
-im_mdl = True
+im_mdl = False
 annotate_res = True
 
 
@@ -45,6 +45,7 @@ f.close()
 
 ### - IMAGE THE DATA
 if im_dat:
+    t0 = time.time()
     print('....')
     print('Imaging the data')
     print('....')
@@ -52,6 +53,7 @@ if im_dat:
     print('....')
     print('Finished imaging the data')
     print('....')
+    t1 = time.time()
 
 
 ### - PLOT THE ANNOTATED IMAGE
@@ -110,20 +112,6 @@ ax.contour(dRA, dDEC, Tb, [2 * rms_Tb], colors='y')
 # annotations
 tbins = np.linspace(-np.pi, np.pi, 181)
 
-for ir in range(len(disk.disk[target]['rgapi'])):
-    rgi = disk.disk[target]['rgapi'][ir]
-    rgo = disk.disk[target]['rgapo'][ir]
-    xgi, ygi = rgi * np.cos(tbins) * np.cos(inclr), rgi * np.sin(tbins)
-    ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
-            -xgi * np.sin(PAr) + ygi * np.cos(PAr), ':w')
-    xgo, ygo = rgo * np.cos(tbins) * np.cos(inclr), rgo * np.sin(tbins)
-    ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
-            -xgo * np.sin(PAr) + ygo * np.cos(PAr), ':w')
-
-xout, yout = rout * np.cos(tbins) * np.cos(inclr), rout * np.sin(tbins)
-ax.plot( xout * np.cos(PAr) + yout * np.sin(PAr),
-        -xout * np.sin(PAr) + yout * np.cos(PAr), '--w')
-
 # beam
 beam = Ellipse((dRA_lims[0] + 0.1*np.diff(dRA_lims), 
                 dDEC_lims[0] + 0.1*np.diff(dDEC_lims)), bmaj, bmin, 90-bPA)
@@ -148,37 +136,6 @@ fig.subplots_adjust(left=0.11, right=0.89, bottom=0.1, top=0.98)
 fig.savefig('../figs/'+target+'_dataimage.pdf')
 
 
-
-
-### - AZIMUTHALLY-AVERAGED PROFILE
-# compute the profile
-rbins = np.arange(hd['CDELT2'] * 3600, 1.5*rout, hd['CDELT2'] * 3600)
-dr = np.abs(np.mean(np.diff(rbins)))
-SBr, err_SBr = np.empty(len(rbins)), np.empty(len(rbins))
-for i in range(len(rbins)):
-    in_annulus = ((r >= rbins[i] - 0.5 * dr) & (r < (rbins[i] + 0.5 * dr)))
-    SBr[i], err_SBr[i] = np.average(Tb[in_annulus]), np.std(Tb[in_annulus])
-
-# basic plot
-fig, ax = plt.subplots(figsize=(7.0, 4.5))
-ax.plot(rbins, SBr)
-
-# annotations
-for ir in range(len(disk.disk[target]['rgapi'])):
-    ri, ro = disk.disk[target]['rgapi'][ir], disk.disk[target]['rgapo'][ir]
-    ax.plot([ri, ri], [0.2, 200], ':k')
-    ax.plot([ro, ro], [0.2, 200], ':k')
-ax.plot([rout, rout], [0.2, 200], '--k')
-
-# labeling
-ax.set_xlim(0, 1.5*rout)
-ax.set_ylim(0.2, 200)
-ax.set_yscale('log')
-ax.set_yticks([1, 10, 100])
-ax.set_yticklabels(['1', '10', '100'])
-ax.set_xlabel('radius  ($^{\prime\prime}$)')
-ax.set_ylabel('brightness temperature  (K)')
-fig.savefig('../figs/'+target+'_SBr.pdf')
 
 
 
@@ -215,6 +172,7 @@ if frank:
 
 ### Imaging
 if im_res:
+    t0 = time.time()
     print('....')
     print('Imaging residuals')
     print('....')
@@ -222,8 +180,10 @@ if im_res:
     print('....')
     print('Finished imaging residuals')
     print('....')
+    t1 = time.time()
 
 if im_mdl:
+    t0 = time.time()
     print('....')
     print('Imaging model')
     print('....')
@@ -231,6 +191,7 @@ if im_mdl:
     print('....')
     print('Finished imaging model')
     print('....')
+    t1 = time.time()
 
 
 ### +/- Residual plot
@@ -256,23 +217,6 @@ if os.path.exists('data/'+target+'_resid.JvMcorr.fits'):
     norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
     im = ax.imshow(1e6*rimg, origin='lower', cmap=mymap, extent=im_bounds, 
                    norm=norm, aspect='equal')
-
-    # gap markers
-    gcols = ['k', 'darkgray']
-    for ir in range(len(disk.disk[target]['rgapi'])):
-        rgi = disk.disk[target]['rgapi'][ir]
-        rgo = disk.disk[target]['rgapo'][ir]
-        xgi, ygi = rgi * np.cos(tbins) * np.cos(inclr), rgi * np.sin(tbins)
-        ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
-                -xgi * np.sin(PAr) + ygi * np.cos(PAr), gcols[ir])
-        xgo, ygo = rgo * np.cos(tbins) * np.cos(inclr), rgo * np.sin(tbins)
-        ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
-                -xgo * np.sin(PAr) + ygo * np.cos(PAr), gcols[ir])
-
-    # outer edge marker
-    xout, yout = rout * np.cos(tbins) * np.cos(inclr), rout * np.sin(tbins)
-    ax.plot( xout * np.cos(PAr) + yout * np.sin(PAr),
-            -xout * np.sin(PAr) + yout * np.cos(PAr), '--', color='darkgray')
 
     # beam
     beam = Ellipse((dRA_lims[0] + 0.1*np.diff(dRA_lims), 
@@ -302,3 +246,5 @@ if os.path.exists('data/'+target+'_resid.JvMcorr.fits'):
     fig.subplots_adjust(wspace=0.02)
     fig.subplots_adjust(left=0.11, right=0.89, bottom=0.1, top=0.98)
     fig.savefig('../figs/'+target+'_resid.pdf')
+
+print(t1 - t0)

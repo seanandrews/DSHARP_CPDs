@@ -11,7 +11,7 @@ targets = ['SR4', 'RULup', 'Elias20', 'Sz129', 'HD143006',
            'GWLup', 'Elias24', 'HD163296', 'AS209']
 
 Rlims  = [0.0, 1.0]
-Flims  = [0, 250]
+Flims  = [0, 255]
 method = 'B'
 
 # plotting conventions

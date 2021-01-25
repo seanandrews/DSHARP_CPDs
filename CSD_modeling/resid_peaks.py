@@ -8,6 +8,8 @@ import diskdictionary as disk
 targets = ['SR4', 'RULup', 'Elias20', 'Sz129', 'HD143006', 'GWLup',
            'Elias24', 'HD163296', 'AS209']
 
+targets = ['Elias24']
+
 
 for i in range(len(targets)):
 
@@ -65,5 +67,9 @@ for i in range(len(targets)):
         SB_str = str(np.int(np.round(pk_SB)))
         rms_str = str(np.int(np.round(np.ma.std(gimg))))
         noise_str = str(np.int(disk.disk[targets[i]]['RMS']))
+        disk_mask = np.zeros_like(img, dtype='bool')
+        disk_mask[(r_d <= (1.2*disk.disk[targets[i]]['rout']))] = 1
+        dimg = img[disk_mask]
+        noise_str = str(np.int(np.round(np.ma.std(dimg))))
         print(name_str + '  ' + 'gap'+str(j) + '  ' + r_str + '  ' + \
               az_str + '  ' + SB_str + '  ' + rms_str + '  ' + noise_str)

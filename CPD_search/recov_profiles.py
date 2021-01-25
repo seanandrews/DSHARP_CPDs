@@ -38,7 +38,7 @@ for i in range(len(targets)):
         # check and see if there is a recovery profile; if not, make a dummy
         rfile = 'recoveries/'+targets[i]+'_gap'+str(ig)+'_rprofs.0.txt'
         if os.path.exists(rfile):
-            Fi, recA, erecA, recB, erecB = np.loadtxt(rfile).T
+            Fi, recA, erecA, falseA, recB, erecB, falseB = np.loadtxt(rfile).T
         else:
             Fi = np.arange(10, 260, 10)
             recA, erecA = np.zeros_like(Fi), np.zeros_like(Fi)

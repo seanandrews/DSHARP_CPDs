@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from astropy.io import fits
+from scipy.special import erf
 sys.path.append('../')
 import diskdictionary as disk
 
@@ -68,9 +69,27 @@ for i in range(len(Fcpd)):
     frec_B[i]  = 1.*len(Fi[is_recovered_B & in_f]) / len(Fi[in_f])
     efrec_B[i] = np.sqrt(len(Fi[is_recovered_B & in_f])) / len(Fi[in_f])
 
+### estimate of false positive fractions
+# probability of a peak falling within the astrometric criterion
+rgap = disk.disk[target]['rgap'][np.int(gap_ix)]
+wgap = disk.disk[target]['wgap'][np.int(gap_ix)]
+p_incritA = dlim_A**2 / ((rgap + wgap)**2 - (rgap - wgap)**2)
+p_incritB = dlim_B**2 / ((rgap + wgap)**2 - (rgap - wgap)**2)
+
+# probability of the peak being a noise spike rather than a CPD injection
+p_spike = 1 - 0.5 * (1 + erf(Fi / (2 * rms)))
+
+# sum up these false positive fractions in each Fcpd bin
+false_A, false_B = np.zeros_like(Fcpd), np.zeros_like(Fcpd)
+for i in range(len(Fcpd)):
+    in_f = (Fi == Fcpd[i])
+    false_A[i] = np.sum(p_incritA[in_f] * p_spike[in_f]) / len(Fi[in_f])
+    false_B[i] = np.sum(p_incritB[in_f] * p_spike[in_f]) / len(Fi[in_f])
+
 # save the profiles in ASCII files
 np.savetxt('recoveries/'+target+'_gap'+gap_ix+'_rprofs.'+subsuf+'.txt', 
-           list(zip(Fcpd, frec_A, efrec_A, frec_B, efrec_B)), fmt='%.4f')
+           list(zip(Fcpd, frec_A, efrec_A, false_A, frec_B, efrec_B, false_B)), 
+                fmt='%.4f')
 
 # plot the profiles
 fig, ax = plt.subplots()

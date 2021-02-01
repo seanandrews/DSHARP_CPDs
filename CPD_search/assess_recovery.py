@@ -8,7 +8,7 @@ sys.path.append('../')
 import diskdictionary as disk
 
 # target disk/gap; iteration
-target, gap_ix, subsuf = 'HD143006', '0', '0'
+target, gap_ix, subsuf = 'Sz129', '0', '0'
 
 # decisions!  How many pixels tolerated?  How many x astrometry RMS?
 npix_tol = 2

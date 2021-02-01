@@ -5,7 +5,7 @@ sys.path.append('../')
 import diskdictionary as disk
 
 # target disk/gap; iteration
-target = 'HD143006'
+target = 'Sz129'
 gap = 0
 ix = '0'
 
@@ -59,7 +59,7 @@ for i in range(len(Fstr)):
 
     # Locate and measure the peak
     peak = (g_img == g_img.max())
-    pk_xs, pk_ys, pk_r, pk_az = g_xs[peak], g_ys[peak], g_rd[peak], g_azd[peak]
+    pk_xs, pk_ys, pk_r, pk_az = g_xs[peak][0], g_ys[peak][0], g_rd[peak][0], g_azd[peak][0]
     pk_SB = g_img.max()
 
     # Quantify the pixel distribution in the gap region

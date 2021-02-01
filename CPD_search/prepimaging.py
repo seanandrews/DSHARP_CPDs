@@ -5,7 +5,7 @@ sys.path.append('../')
 import diskdictionary as disk
 
 # specify target disk, gap, and mock file index
-target, gap_ix, subsuf = 'SR4', '0', '0'
+target, gap_ix, subsuf = 'Sz129', '0', '0'
 
 # # # # # # #
 
@@ -19,7 +19,7 @@ os.system('casa --nogui --nologger --nologfile -c prepimaging_casa.py')
 
 # make a custom mask for the gap of interest
 custom_mask(target, np.int(gap_ix), target+'_gap'+gap_ix+'.'+subsuf,
-            buffer_factor=2.0)
+            buffer_factor=1.5)
 
 # make a script to convert custom mask into CASA format
 os.system('casa --nogui --nologger --nologfile -c mask_to_casa.py')

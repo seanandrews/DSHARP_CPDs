@@ -8,7 +8,7 @@ import diskdictionary as disk
 targets = ['SR4', 'RULup', 'Elias20', 'Sz129', 'HD143006', 'GWLup',
            'Elias24', 'HD163296', 'AS209']
 
-targets = ['Elias24']
+targets = ['HD143006']
 
 
 for i in range(len(targets)):

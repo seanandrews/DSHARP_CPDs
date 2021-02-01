@@ -75,8 +75,8 @@ disk['Elias20'] =  {'name': 'Elias20',
                     'cthresh': '0.06mJy',
                     'crobust': 0.0,
                     'ctaper': [],
-                    'cgain': 0.1,
-                    'ccycleniter': 100,
+                    'cgain': 0.3,
+                    'ccycleniter': 300,
                     'RMS': 10
 }
 
@@ -98,12 +98,14 @@ disk['Sz129'] =    {'name': 'Sz129',
                     'cmask': 'ellipse[[15h59m16.454s, -41.57.10.693631], ' + \
                              '[0.85arcsec, 0.7arcsec], 150deg]',
                     'cscales': [0, 5, 30, 75],
+                    'gscales': [0, 5, 10],
                     'cthresh': '0.05mJy',
+                    'gthresh': '0.024mJy',
                     'crobust': 0.0,
                     'ctaper': [],
-                    'cgain': 0.1,
+                    'cgain': 0.3,
                     'ccycleniter': 300,
-                    'RMS': 11
+                    'RMS': 12
 }
 
 disk['HD143006'] = {'name': 'HD143006', 
@@ -154,6 +156,7 @@ disk['GWLup'] =    {'name': 'GWLup',
                     'cthresh': '0.05mJy',
                     'crobust': 0.5,
                     'ctaper': ['0.035arcsec', '0.015arcsec', '0deg'],
+                    #'ctaper': ['0.020arcsec', '0.010arcsec', '0deg'],
                     'cgain': 0.3,
                     'ccycleniter': 300,
                     'RMS': 6.0
@@ -184,7 +187,7 @@ disk['Elias24'] =  {'name': 'Elias24',
                     'ctaper': ['0.035arcsec', '0.01arcsec', '166deg'],
                     'cgain': 0.3,
                     'ccycleniter': 300,
-                    'RMS': 11
+                    'RMS': 12
 }
 
 disk['HD163296'] = {'name': 'HD163296', 
@@ -205,12 +208,14 @@ disk['HD163296'] = {'name': 'HD163296',
                     'cmask': 'ellipse[[17h56m21.279s, -21.57.22.556], ' + \
                              '[2.5arcsec, 1.8arcsec], 140deg]',
                     'cscales': [0, 10, 30, 75, 150, 300],
+                    'gscales': [0, 5, 10],
                     'cthresh': '0.06mJy',
+                    'gthresh': '0.04mJy',
                     'crobust': -0.5,
                     'ctaper': [],
                     'cgain': 0.3,
                     'ccycleniter': 300,
-                    'RMS': 19
+                    'RMS': 20
 }
 
 disk['AS209'] =    {'name': 'AS209',
@@ -234,7 +239,7 @@ disk['AS209'] =    {'name': 'AS209',
                     'cthresh': '0.08mJy',
                     'crobust': -0.5,
                     'ctaper': ['0.037arcsec', '0.01arcsec', '162deg'],
-                    'cgain': 0.2,
+                    'cgain': 0.3,
                     'ccycleniter': 300,
-                    'RMS': 10
+                    'RMS': 11
 }

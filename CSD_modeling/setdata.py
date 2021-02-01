@@ -15,12 +15,12 @@ import diskdictionary as disk
 
 
 # controls
-target = 'Elias24'
+target = 'GWLup'
 
 frank  = False
 im_dat = False
-im_res = True
-im_mdl = False
+im_res = False
+im_mdl = True
 annotate_res = True
 
 

@@ -20,7 +20,7 @@ for ext in ['.image', '.mask', '.model', '.pb', '.psf', '.residual', '.sumwt']:
 tclean(vis='data/'+target+'_continuum_spavg_tbin30s.model.ms', 
        imagename=imagename, specmode='mfs', deconvolver='multiscale',
        scales=disk.disk[target]['cscales'], mask=disk.disk[target]['cmask'], 
-       imsize=1024, cell='.006arcsec', gain=disk.disk[target]['cgain'],
+       imsize=2048, cell='.003arcsec', gain=disk.disk[target]['cgain'],
        cycleniter=disk.disk[target]['ccycleniter'], cyclefactor=1, nterms=1,
        weighting='briggs', robust=disk.disk[target]['crobust'],
        uvtaper=disk.disk[target]['ctaper'], 

@@ -10,19 +10,20 @@ import diskdictionary as disk
 target = str(np.loadtxt('whichdisk.txt', dtype='str'))
 
 # Perform the imaging
-tclean_wrapper(vis='data/'+target+'_data_symm.ms',
-               imagename='data/'+target+'_data_symm', 
-               mask=disk.disk[target]['cmask'], 
-               scales=disk.disk[target]['cscales'],
-               imsize=3000, cellsize='.003arcsec', 
-               threshold=disk.disk[target]['cthresh'],
-               gain=disk.disk[target]['cgain'],
-               cycleniter=disk.disk[target]['ccycleniter'],
-               robust=disk.disk[target]['crobust'],
-               uvtaper=disk.disk[target]['ctaper'])
+imagename = 'data/'+target+'_data_symm'
+for ext in ['.image', '.mask', '.model', '.pb', '.psf', '.residual', '.sumwt']:
+    os.system('rm -rf '+imagename+ext)
+tclean(vis='data/'+target+'_data_symm.ms',
+       imagename=imagename, specmode='mfs', deconvolver='multiscale',
+       scales=disk.disk[target]['cscales'], mask=disk.disk[target]['cmask'], 
+       imsize=1024, cell='.006arcsec', gain=disk.disk[target]['cgain'],
+       cycleniter=disk.disk[target]['ccycleniter'], cyclefactor=1, nterms=1,
+       weighting='briggs', robust=disk.disk[target]['crobust'],
+       uvtaper=disk.disk[target]['ctaper'],
+       niter=50000, threshold=disk.disk[target]['cthresh'], savemodel='none')
 
 # Perform the JvM correction
-eps = do_JvM_correction_and_get_epsilon('data/'+target+'_data_symm')
+eps = do_JvM_correction_and_get_epsilon(imagename)
 
 # Estimate map RMS as in DSHARP
 coords = str.split(str.split(disk.disk[target]['cmask'], ']')[0], '[[')[1]
@@ -33,7 +34,6 @@ estimate_SNR('data/'+target+'_data_symm.JvMcorr.image',
 print('epsilon = ', eps)
 
 # Export FITS files of the original + JvM-corrected images
-exportfits('data/'+target+'_data_symm.image', 
-           'data/'+target+'_data_symm.fits', overwrite=True)
-exportfits('data/'+target+'_data_symm.JvMcorr.image',
-           'data/'+target+'_data_symm.JvMcorr.fits', overwrite=True)
+exportfits(imagename+'.image', imagename+'.fits', overwrite=True)
+exportfits(imagename+'.JvMcorr.image', imagename+'.JvMcorr.fits', 
+           overwrite=True)

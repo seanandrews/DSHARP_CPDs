@@ -32,7 +32,7 @@ frank_symm = False
 im_res = False
 im_res_symm = False
 im_mdl = False
-im_mdl_symm = False
+im_mdl_symm = True
 annotate_res = False
 
 
@@ -122,20 +122,6 @@ print(rms_Tb)
 
 # annotations
 tbins = np.linspace(-np.pi, np.pi, 181)
-
-for ir in range(len(disk.disk[target]['rgapi'])):
-    rgi = disk.disk[target]['rgapi'][ir]
-    rgo = disk.disk[target]['rgapo'][ir]
-    xgi, ygi = rgi * np.cos(tbins) * np.cos(inclr), rgi * np.sin(tbins)
-    ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
-            -xgi * np.sin(PAr) + ygi * np.cos(PAr), ':w')
-    xgo, ygo = rgo * np.cos(tbins) * np.cos(inclr), rgo * np.sin(tbins)
-    ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
-            -xgo * np.sin(PAr) + ygo * np.cos(PAr), ':w')
-
-xout, yout = rout * np.cos(tbins) * np.cos(inclr), rout * np.sin(tbins)
-ax.plot( xout * np.cos(PAr) + yout * np.sin(PAr),
-        -xout * np.sin(PAr) + yout * np.cos(PAr), '--w')
 
 # beam
 beam = Ellipse((dRA_lims[0] + 0.1*np.diff(dRA_lims), 
@@ -294,23 +280,6 @@ if os.path.exists('data/'+target+'_resid.JvMcorr.fits'):
     norm = ImageNormalize(vmin=vmin, vmax=vmax, stretch=LinearStretch())
     im = ax.imshow(1e6*rimg, origin='lower', cmap=mymap, extent=im_bounds, 
                    norm=norm, aspect='equal')
-
-    # gap markers
-    gcols = ['k', 'darkgray']
-    for ir in range(len(disk.disk[target]['rgapi'])):
-        rgi = disk.disk[target]['rgapi'][ir]
-        rgo = disk.disk[target]['rgapo'][ir]
-        xgi, ygi = rgi * np.cos(tbins) * np.cos(inclr), rgi * np.sin(tbins)
-        ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
-                -xgi * np.sin(PAr) + ygi * np.cos(PAr), gcols[ir])
-        xgo, ygo = rgo * np.cos(tbins) * np.cos(inclr), rgo * np.sin(tbins)
-        ax.plot( xgo * np.cos(PAr) + ygo * np.sin(PAr),
-                -xgo * np.sin(PAr) + ygo * np.cos(PAr), gcols[ir])
-
-    # outer edge marker
-    xout, yout = rout * np.cos(tbins) * np.cos(inclr), rout * np.sin(tbins)
-    ax.plot( xout * np.cos(PAr) + yout * np.sin(PAr),
-            -xout * np.sin(PAr) + yout * np.cos(PAr), '--', color='darkgray')
 
     # beam
     beam = Ellipse((dRA_lims[0] + 0.1*np.diff(dRA_lims), 

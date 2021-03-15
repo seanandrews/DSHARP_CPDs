@@ -10,7 +10,7 @@ import diskdictionary as disk
 target = str(np.loadtxt('whichdisk.txt', dtype='str'))
 
 # Perform the imaging
-imagename = 'data/'+target+'_data_symm'
+imagename = 'data/deep_'+target+'_data_symm'
 for ext in ['.image', '.mask', '.model', '.pb', '.psf', '.residual', '.sumwt']:
     os.system('rm -rf '+imagename+ext)
 tclean(vis='data/'+target+'_data_symm.ms',
@@ -20,7 +20,7 @@ tclean(vis='data/'+target+'_data_symm.ms',
        cycleniter=disk.disk[target]['ccycleniter'], cyclefactor=1, nterms=1,
        weighting='briggs', robust=disk.disk[target]['crobust'],
        uvtaper=disk.disk[target]['ctaper'],
-       niter=50000, threshold=disk.disk[target]['cthresh'], savemodel='none')
+       niter=50000, threshold=disk.disk[target]['gthresh'], savemodel='none')
 
 # Perform the JvM correction
 eps = do_JvM_correction_and_get_epsilon(imagename)
@@ -29,7 +29,7 @@ eps = do_JvM_correction_and_get_epsilon(imagename)
 coords = str.split(str.split(disk.disk[target]['cmask'], ']')[0], '[[')[1]
 noise_ann = "annulus[[%s], ['%.2farcsec', '4.25arcsec']]" % \
             (coords, 1.2 * disk.disk[target]['rout'])
-estimate_SNR('data/'+target+'_data_symm.JvMcorr.image', 
+estimate_SNR(imagename+'.JvMcorr.image', 
              disk_mask = disk.disk[target]['cmask'], noise_mask=noise_ann)
 print('epsilon = ', eps)
 

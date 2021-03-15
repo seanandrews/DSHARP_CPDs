@@ -5,7 +5,7 @@ sys.path.append('../')
 import diskdictionary as disk
 
 # specify target disk, gap, and mock file index
-target, gap_ix, subsuf = 'Sz129', '0', '0'
+target, gap_ix, subsuf = 'HD143006', '1', '0'
 
 # # # # # # #
 

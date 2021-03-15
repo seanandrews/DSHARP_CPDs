@@ -70,7 +70,7 @@ ax = fig.add_subplot(gs[0,0])
 im = ax.imshow(1e6 * rt.image, origin='lower', cmap=cmap, extent=im_bounds, 
                norm=cnorm, aspect='equal')
 
-# ring annotations
+# bright ring annotations
 tt = np.linspace(-np.pi, np.pi, 91)
 inclr = np.radians(disk.disk['HD143006']['incl'])
 PAr = np.radians(disk.disk['HD143006']['PA'])
@@ -81,6 +81,12 @@ for ir in range(len(rring)):
     ax.plot( xgi * np.cos(PAr) + ygi * np.sin(PAr),
             -xgi * np.sin(PAr) + ygi * np.cos(PAr), ':', color='w',
             lw=0.8, alpha=0.7)
+
+# mark azimuth = 0 line (for reference)
+rmaz, pmaz = 0.65, np.radians(20.)
+xmaz = rmaz * np.cos(inclr) * np.cos(PAr)
+ymaz = -rmaz * np.cos(inclr) * np.sin(PAr)
+ax.plot([0, xmaz], [0, ymaz], '--w', lw=0.8, alpha=0.7, zorder=2)
 
 # vortex annotations
 rbounds, azbounds = [0.393, 0.55], [90., 142.]
@@ -116,6 +122,9 @@ beam.set_facecolor('w')
 ax.add_artist(beam)
 
 # limits and labeling
+ax.text(dRA_lims[0] + 0.05*np.diff(dRA_lims),
+        dDEC_lims[1] - 0.09*np.diff(dDEC_lims),
+        'HD 143006', color='w', fontsize=8)
 ax.set_xlim(dRA_lims)
 ax.set_ylim(dDEC_lims)
 ax.set_xticks(xyticks[::-1])
@@ -136,8 +145,15 @@ im = ax.imshow(rt.raz_map * 1e6, origin='lower', cmap=cmap, extent=rt_bounds,
                norm=cnorm, aspect='auto')
 
 # annotations
+
+# bright ring centers
 for ir in range(len(rring)):
     ax.plot([rring[ir], rring[ir]], [-180, 180], ':w', lw=0.8, alpha=0.7)
+
+# azimuth = 0
+ax.plot([0, rmaz], [0, 0], '--w', lw=0.8, alpha=0.7, zorder=2)
+
+# vortex
 ax.plot([rbounds[0], rbounds[1], rbounds[1], rbounds[0], rbounds[0]],
         [azbounds[0], azbounds[0], azbounds[1], azbounds[1], azbounds[0]],
         ':w', lw=0.8, alpha=0.7)
@@ -145,10 +161,6 @@ ax.plot([rbounds[0], rbounds[1], rbounds[1], rbounds[0], rbounds[0]],
 # Archimedean spiral model
 ax.plot(Rsp[tbins_sp <= 180], tbins_sp[tbins_sp <= 180], '--y', alpha=0.7)
 ax.plot(Rsp[tbins_sp > 180], tbins_sp[tbins_sp > 180] - 360, '--y', alpha=0.7)
-
-
-for isp in range(len(tbins_sp)):
-    print(Rsp[isp], np.degrees(np.arctan2(np.abs(csp), np.abs(Rsp[isp]))))
 
 
 

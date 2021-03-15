@@ -3,12 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from astropy.io import fits
-from scipy.special import erf
+from scipy.special import erfc
 sys.path.append('../')
 import diskdictionary as disk
 
 # target disk/gap; iteration
-target, gap_ix, subsuf = 'Sz129', '0', '0'
+target, gap_ix, subsuf = 'AS209', '0', 'all'
 
 # decisions!  How many pixels tolerated?  How many x astrometry RMS?
 npix_tol = 2
@@ -35,10 +35,12 @@ yi = ri * np.sin(azir) * np.cos(PAr) - \
 d_ir = np.sqrt((xi - xr)**2 + (yi - yr)**2)
 
 # load beam parameters from residual image header
-imfile = 'resid_images/'+target+'_gap'+gap_ix+'.F'+str(np.int(Fi[0]))+'uJy'+ \
+imdir = '/data/sandrews/DSHARP_CPDs/CPD_search/resid_images/'
+imfile = imdir+target+'_gap'+gap_ix+'.F'+str(np.int(Fi[0]))+'uJy'+ \
          '_0000.resid.JvMcorr.fits'
 rim, hd = np.squeeze(fits.open(imfile)[0].data), fits.open(imfile)[0].header
 beam_fwhm = np.sqrt(3600**2 * hd['BMAJ'] * hd['BMIN'])
+beam_area = 3600**2 * np.pi * hd['BMAJ'] * hd['BMIN'] / (4 * np.log(2))
 
 # find maximum baseline length in kilometers
 vdat = np.load('data/'+target+'_data.vis.npz')
@@ -69,23 +71,25 @@ for i in range(len(Fcpd)):
     frec_B[i]  = 1.*len(Fi[is_recovered_B & in_f]) / len(Fi[in_f])
     efrec_B[i] = np.sqrt(len(Fi[is_recovered_B & in_f])) / len(Fi[in_f])
 
-### estimate of false positive fractions
-# probability of a peak falling within the astrometric criterion
+### crude estimate of false positive fractions
 rgap = disk.disk[target]['rgap'][np.int(gap_ix)]
 wgap = disk.disk[target]['wgap'][np.int(gap_ix)]
-p_incritA = dlim_A**2 / ((rgap + wgap)**2 - (rgap - wgap)**2)
-p_incritB = dlim_B**2 / ((rgap + wgap)**2 - (rgap - wgap)**2)
-
-# probability of the peak being a noise spike rather than a CPD injection
-p_spike = 1 - 0.5 * (1 + erf(Fi / (2 * rms)))
-
-# sum up these false positive fractions in each Fcpd bin
+pf_astA, pf_astB = np.zeros_like(Fcpd), np.zeros_like(Fcpd)
+pf_spike = np.zeros_like(Fcpd)
 false_A, false_B = np.zeros_like(Fcpd), np.zeros_like(Fcpd)
 for i in range(len(Fcpd)):
     in_f = (Fi == Fcpd[i])
-    false_A[i] = np.sum(p_incritA[in_f] * p_spike[in_f]) / len(Fi[in_f])
-    false_B[i] = np.sum(p_incritB[in_f] * p_spike[in_f]) / len(Fi[in_f])
+    # probability of a peak falling within the astrometric criterion
+    pf_astA[i] = np.max((np.pi*np.average(dlim_A[in_f])**2 / beam_area, 1)) / \
+                 (4 * np.pi * rgap * wgap / beam_area)
+    pf_astB[i] = np.max((np.pi*np.average(dlim_B[in_f])**2 / beam_area, 1)) / \
+                 (4 * np.pi * rgap * wgap / beam_area)
+    # probability of peak being a (Gaussian) noise spike
+    pf_spike[i] = 0.5 * erfc(Fcpd[i] / (2 * np.average(rms[in_f])))
+    false_A[i] = pf_astA[i] * pf_spike[i]
+    false_B[i] = pf_astB[i] * pf_spike[i]
 
+    
 # save the profiles in ASCII files
 np.savetxt('recoveries/'+target+'_gap'+gap_ix+'_rprofs.'+subsuf+'.txt', 
            list(zip(Fcpd, frec_A, efrec_A, false_A, frec_B, efrec_B, false_B)), 
@@ -164,15 +168,27 @@ print('----------------------------------------')
 nfailsA, nfailsB = 0, 0
 for i in range(1,6):
     fails_Ao, nctsA = valsA[ctsA == np.sort(ctsA)[-i]][0], np.sort(ctsA)[-i]
-    print('crit A: F = %i, r = %.3f, az = %i  (N = %i) ' % \
-          (fails_Ao[0], fails_Ao[1], fails_Ao[2], nctsA))
+    xd = fails_Ao[1] * np.cos(np.radians(fails_Ao[2]))
+    yd = fails_Ao[1] * np.sin(np.radians(fails_Ao[2]))
+    xs =  xd * np.cos(PAr) * np.cos(inclr) + yd * np.sin(PAr)
+    ys = -xd * np.sin(PAr) * np.cos(inclr) + yd * np.cos(PAr)
+    DR = np.sqrt(xs**2 + ys**2)
+    DT = 90 - np.degrees(np.arctan2(ys, xs))
+    print('crit A: F = %i, r = %.3f, az = %i, rho=%.3f, PA = %i  (N = %i) ' % \
+          (fails_Ao[0], fails_Ao[1], fails_Ao[2], DR, DT, nctsA))
     nfailsA += nctsA
 print('fraction of crit A fails = %.2f' % (1.*nfailsA / len(FnA)))
 print(' ')
 for i in range(1, 6):
     fails_Bo, nctsB = valsB[ctsB == np.sort(ctsB)[-i]][0], np.sort(ctsB)[-i]
-    print('crit B: F = %i, r = %.3f, az = %i  (N = %i) ' % \
-          (fails_Bo[0], fails_Bo[1], fails_Bo[2], nctsB))
+    xd = fails_Bo[1] * np.cos(np.radians(fails_Bo[2]))
+    yd = fails_Bo[1] * np.sin(np.radians(fails_Bo[2]))
+    xs =  xd * np.cos(PAr) * np.cos(inclr) + yd * np.sin(PAr)
+    ys = -xd * np.sin(PAr) * np.cos(inclr) + yd * np.cos(PAr)
+    DR = np.sqrt(xs**2 + ys**2)
+    DT = 90 - np.degrees(np.arctan2(ys, xs))
+    print('crit B: F = %i, r = %.3f, az = %i, rho=%.3f, PA =%i  (N = %i) ' % \
+          (fails_Bo[0], fails_Bo[1], fails_Bo[2], DR, DT, nctsB))
     nfailsB += nctsB
 print('fraction of crit B fails = %.2f' % (1.*nfailsB / len(FnB)))
 print(' ')

@@ -33,7 +33,6 @@ plt.style.use('default')
 plt.rc('font', size=6)
 left, right, bottom, top = 0.09, 0.92, 0.05, 0.99
 wspace, hspace = 0.03, 0.15
-#fig = plt.figure(figsize=(3.5, 5.2))
 fig = plt.figure(figsize=(3.5, 5.4))
 gs = gridspec.GridSpec(5, 4, width_ratios=(1, 1, 1, 0.08),
                              height_ratios=(1, 1, 1, 1, 1))
@@ -44,9 +43,9 @@ for i in range(len(targets)):
     ### Prepare image plotting
     # parse header information into physical numbers
     if (targets[i] == 'HD143006'):
-        dfile = 'data/'+targets[i]+'_data_symm.JvMcorr.fits'
+        dfile = 'data/deep_'+targets[i]+'_data_symm.JvMcorr.fits'
     else:
-        dfile = 'data/'+targets[i]+'_data.JvMcorr.fits'
+        dfile = 'data/deep_'+targets[i]+'_data.JvMcorr.fits'
     hd = fits.open(dfile)[0].header
     nx, ny = hd['NAXIS1'], hd['NAXIS2']
     RAo  = 3600 * hd['CDELT1'] * (np.arange(nx) - (hd['CRPIX1'] - 1))
@@ -72,9 +71,9 @@ for i in range(len(targets)):
     for j in range(len(dmr)):
         # load image
         if (targets[i] == 'HD143006'):
-            dfile = 'data/'+targets[i]+'_'+dmr[j]+'_symm.JvMcorr.fits'
+            dfile = 'data/deep_'+targets[i]+'_'+dmr[j]+'_symm.JvMcorr.fits'
         else:
-            dfile = 'data/'+targets[i]+'_'+dmr[j]+'.JvMcorr.fits'
+            dfile = 'data/deep_'+targets[i]+'_'+dmr[j]+'.JvMcorr.fits'
         hdu = fits.open(dfile)
         img = np.squeeze(hdu[0].data)    
 

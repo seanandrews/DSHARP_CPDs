@@ -26,11 +26,11 @@ azbounds = [50., 150.]
 
 im_dat = False
 rm_az = False
-im_dat_symm = False
+im_dat_symm = True
 frank = False
 frank_symm = False
 im_res = False
-im_res_symm = False
+im_res_symm = True
 im_mdl = False
 im_mdl_symm = True
 annotate_res = False

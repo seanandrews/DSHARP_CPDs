@@ -14,7 +14,7 @@ ImportMS('data/'+target+'_data_symm.ms',
          'fits/'+target+'_frank_uv_fit', suffix='model')
 
 # Perform the imaging
-imagename = 'data/'+target+'_model_symm'
+imagename = 'data/deep_'+target+'_model_symm'
 for ext in ['.image', '.mask', '.model', '.pb', '.psf', '.residual', '.sumwt']:
     os.system('rm -rf '+imagename+ext)
 tclean(vis='data/'+target+'_data_symm.model.ms',
@@ -24,7 +24,7 @@ tclean(vis='data/'+target+'_data_symm.model.ms',
        cycleniter=disk.disk[target]['ccycleniter'], cyclefactor=1, nterms=1,
        weighting='briggs', robust=disk.disk[target]['crobust'],
        uvtaper=disk.disk[target]['ctaper'],
-       niter=50000, threshold=disk.disk[target]['cthresh'], savemodel='none')
+       niter=50000, threshold=disk.disk[target]['gthresh'], savemodel='none')
 
 # Perform the JvM correction
 eps = do_JvM_correction_and_get_epsilon(imagename)

@@ -42,9 +42,9 @@ for i in range(len(targets)):
     ### Prepare image plotting
     # parse header information into physical numbers
     if (targets[i] == 'HD163296'):
-        dfile = 'data/'+targets[i]+'_data_symm.JvMcorr.fits'
+        dfile = 'data/deep_'+targets[i]+'_data_symm.JvMcorr.fits'
     else:
-        dfile = 'data/'+targets[i]+'_data.JvMcorr.fits'
+        dfile = 'data/deep_'+targets[i]+'_data.JvMcorr.fits'
     hd = fits.open(dfile)[0].header
     nx, ny = hd['NAXIS1'], hd['NAXIS2']
     RAo  = 3600 * hd['CDELT1'] * (np.arange(nx) - (hd['CRPIX1'] - 1))
@@ -70,9 +70,9 @@ for i in range(len(targets)):
     for j in range(len(dmr)):
         # load image
         if (targets[i] == 'HD163296'):
-            dfile = 'data/'+targets[i]+'_'+dmr[j]+'_symm.JvMcorr.fits'
+            dfile = 'data/deep_'+targets[i]+'_'+dmr[j]+'_symm.JvMcorr.fits'
         else:
-            dfile = 'data/'+targets[i]+'_'+dmr[j]+'.JvMcorr.fits'
+            dfile = 'data/deep_'+targets[i]+'_'+dmr[j]+'.JvMcorr.fits'
         hdu = fits.open(dfile)
         img = np.squeeze(hdu[0].data)    
 

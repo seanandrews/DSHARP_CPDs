@@ -15,7 +15,7 @@ import diskdictionary as disk
 
 
 # controls
-target = 'GWLup'
+target = 'AS209'
 
 frank  = False
 im_dat = False
